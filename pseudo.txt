@@ -25,26 +25,26 @@ TaskFIFO implements Runnable{
   public TaskFIFO(pageRefArray){
     // queue of length 250 (vm pages)
     	// each item is a spot of virutal memory, occupied by timestamp when it first occupied the current frame
-	// replace the page at the head of the queue
-	// insert new (or returning) pages at the tail of the queue
-    // array of length 100 (memory frame list)
+      // replace the page at the head of the queue
+      // insert new (or returning) pages at the tail of the queue
+    // array of length 1 to 100 (memory frame list)
         // index is a frame (piece of physical memory)
 	// each value is a virtual memory address ("refers" to a page number)
   }
 
-  //runs the 1000 page reference sequence
+  // runs the 1000 page reference sequence
   run(){
     for each pageRef of pageReferences{
       search frameList for pageRef
       if it's not there AKA page fault {
-	numPageFaults++;
-	is there a free space in frameList (aka is there a negative value) {
-	  then occupy it
-	}
-	else {
+        numPageFaults++;
+        is there a free space in frameList (aka is there a negative value) {
+          then occupy it
+        }
+        else {
           queue.pop()
-	  queue.append(pageRef)?
-	}
+          queue.append(pageRef)?
+        }
       }
     }
   }
