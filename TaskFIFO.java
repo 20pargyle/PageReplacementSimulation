@@ -1,18 +1,19 @@
 import java.util.*;
-
-public class TaskFIFO implements Runnable{
-    private LinkedList<Integer> frameList = new LinkedList<>();
+public class TaskFIFO implements Runnable {
+    private LinkedList<Integer> frameList;
     private int[] sequence;
     private int maxMemoryFrames;
-    private int MAX_PAGE_REFERENCE;
+    private final int MAX_PAGE_REFERENCE;
     private int[] pageFaults;
-    int numPageFaults = 0;
+    private int numPageFaults;
 
     public TaskFIFO(int[] sequence, int maxMemoryFrames, int MAX_PAGE_REFERENCE, int[] pageFaults){
         this.sequence = sequence;
         this.maxMemoryFrames = maxMemoryFrames;
         this.MAX_PAGE_REFERENCE = MAX_PAGE_REFERENCE;
         this.pageFaults = pageFaults;
+        this.numPageFaults = 0;
+        this.frameList = new LinkedList<>();
     }
 
     @Override
@@ -21,22 +22,14 @@ public class TaskFIFO implements Runnable{
             frameList.add(-1);
         }
         for (int pageRef : sequence) {
-            // search frameList for desired page
-            // if already there, do nothing;
+            // if the page is already loaded, do nothing;
+            // if not, take out the oldest and add the newest 
             if (frameList.indexOf(pageRef) < 0){
                 numPageFaults++;
-                // search frameList for empty spots
-                if (frameList.indexOf(-1) >= 0){
-                    frameList.add(pageRef);
-                    frameList.pop();
-                }
-                // if no empty spots, remove the oldest and add the newest
-                else {
-                    frameList.add(pageRef);
-                    frameList.pop();
-                }
+                frameList.pop();
+                frameList.add(pageRef);
             }
         }
-        pageFaults[maxMemoryFrames-1] = numPageFaults;
+        pageFaults[maxMemoryFrames] = numPageFaults;
     }
 }
