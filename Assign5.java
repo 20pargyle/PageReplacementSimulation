@@ -5,7 +5,7 @@ public class Assign5 {
     public static void main(String[] args) {
         int[][][] results = new int[3][1000][];
         ExecutorService threadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-
+        
         long startTime = System.currentTimeMillis();
         for (int i = 0; i < 1000; i++) {
             results[0][i] = new int[101]; // for FIFO
@@ -33,6 +33,26 @@ public class Assign5 {
         System.out.printf("\nSimulation took %d ms\n\n", System.currentTimeMillis() - startTime);
 
         // min page fault detection
+        int minFIFO = 0;
+        int minLRU = 0;
+        int minMRU = 0;
+        for (int i = 0; i < results[0].length; i++) {
+            for (int j = 1; j < results[0][i].length-1; j++) {
+                int minValue = Math.min(Math.min(results[0][i][j], results[1][i][j]), results[2][i][j]);
+                if (minValue == results[0][i][j]){
+                    minFIFO++;
+                }
+                if (minValue == results[1][i][j]){
+                    minLRU++;
+                }
+                if (minValue == results[2][i][j]){
+                    minMRU++;
+                }
+            }
+        }
+        System.out.printf("FIFO min PF : %d\n", minFIFO);
+        System.out.printf("LRU min PF  : %d\n", minLRU);
+        System.out.printf("MRU min PF  : %d\n\n", minMRU);
 
         reportAnomaly("FIFO", results[0]);
         reportAnomaly("LRU", results[1]);
@@ -53,7 +73,7 @@ public class Assign5 {
         int maxDiff = 0;
         System.out.printf("Belady's Anomaly Report for %s\n\n", algorithmName);
         for (int[] list : results) {
-            for (int i = 1; i < list.length-2; i++) {
+            for (int i = 1; i < list.length-1; i++) {
                 if (list[i] < list[i+1]){
                     int diff = list[i+1] - list[i];
                     // System.out.printf("detected - Previous %d : Current %d (%d)\n", list[i], list[i+1], diff);
@@ -67,64 +87,52 @@ public class Assign5 {
         System.out.printf("\tAnomaly detected %d times with a max difference of %d\n\n", anomalyCount, maxDiff);
     }
 
+    private static void reportTestAnomaly(String algorithmName, int[] results){
+        int anomalyCount = 0;
+        int maxDiff = 0;
+        System.out.printf("Belady's Anomaly Report for %s\n\n", algorithmName);
+        for (int i = 1; i < results.length-1; i++) {
+            if (results[i] < results[i+1]){
+                int diff = results[i+1] - results[i];
+                // System.out.printf("detected - Previous %d : Current %d (%d)\n", list[i], list[i+1], diff);
+                anomalyCount++;
+                if (diff > maxDiff){
+                    maxDiff = diff;
+                }
+            }
+        }
+        System.out.printf("\tAnomaly detected %d times with a max difference of %d\n\n", anomalyCount, maxDiff);
+    }
+
     public static void testFIFO() {
-        int[] sequence1 = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-        int[] sequence2 = {1, 2, 1, 3, 2, 1, 2, 3, 4,7,6,4,5,7,8,6,5,4,4,3,2,2,2,4,7,9,6,4,6,9};
-        int[] pageFaults = new int[4];  // 4 because maxMemoryFrames is 3
-    
-        // Replacement should be: 1, 2, 3, 4, 5, 6, 7, 8
-        // Page Faults should be 9
-        (new TaskFIFO(sequence1, 1, MAX_PAGE_REFERENCE, pageFaults)).run();
-        System.out.printf("Page Faults: %d\n", pageFaults[1]);
-    
-        // Replacement should be: 1, 2, -, 1, 
-        // Page Faults should be 7
-        (new TaskFIFO(sequence2, 2, MAX_PAGE_REFERENCE, pageFaults)).run();
-        System.out.printf("Page Faults: %d\n", pageFaults[2]);
-    
-        // Replacement should be: 1, 2, 3, -, -, -, -, 1
-        // Page Faults should be 4
-        (new TaskFIFO(sequence2, 5, MAX_PAGE_REFERENCE, pageFaults)).run();
-        System.out.printf("Page Faults: %d\n", pageFaults[3]);
+        int[] sequence2 = {1, 2, 1, 3, 2, 1, 2, 3, 4,6,5,2,5,7,3,2,5,7,9,0,7,5,3,1,3,5,4,7,8,7,5,3,2,6,6,6,6,6,5,2,3,5,10,4};
+        int[] pageFaults = new int[10];
+
+        for (int i = 1; i < pageFaults.length; i++) {
+            (new TaskLRU(sequence2, i, MAX_PAGE_REFERENCE, pageFaults)).run();
+            System.out.printf("Page Faults: %d\n", pageFaults[i]);  
+        }
+        reportTestAnomaly("FIFO", pageFaults);
     }
     public static void testLRU() {
-        int[] sequence1 = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-        int[] sequence2 = {1, 2, 1, 3, 2, 1, 2, 3, 4};
-        int[] pageFaults = new int[4];  // 4 because maxMemoryFrames is 3
+        int[] sequence2 = {1, 2, 1, 3, 2, 1, 2, 3, 4,6,5,2,5,7,3,2,5,7,9,0,7,5,3,1,3,5,4,7,8,7,5,3,2,6,6,6,6,6,5,2,3,5,10,4};
+        int[] pageFaults = new int[10];
 
-        // Replacement should be: 1, 2, 3, 4, 5, 6, 7, 8
-        // Page Faults should be 9
-        (new TaskLRU(sequence1, 1, MAX_PAGE_REFERENCE, pageFaults)).run();
-        System.out.printf("Page Faults: %d\n", pageFaults[1]);
-
-        // Replacement should be: 2, 1, 3, 1, 2
-        // Page Faults should be 7
-        (new TaskLRU(sequence2, 2, MAX_PAGE_REFERENCE, pageFaults)).run();
-        System.out.printf("Page Faults: %d\n", pageFaults[2]);
-
-        // Replacement should be: 1
-        // Page Faults should be 4
-        (new TaskLRU(sequence2, 3, MAX_PAGE_REFERENCE, pageFaults)).run();
-        System.out.printf("Page Faults: %d\n", pageFaults[3]); 
+        for (int i = 1; i < pageFaults.length; i++) {
+            (new TaskLRU(sequence2, i, MAX_PAGE_REFERENCE, pageFaults)).run();
+            System.out.printf("Page Faults: %d\n", pageFaults[i]);  
+        }
+        reportTestAnomaly("LRU", pageFaults);
     }
+
     public static void testMRU() {
-        int[] sequence1 = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-        int[] sequence2 = {1, 2, 1, 3, 2, 1, 2, 3, 4};
-        int[] pageFaults = new int[4];  // 4 because maxMemoryFrames is 3
-    
-        // Replacement should be: 1, 2, 3, 4, 5, 6, 7, 8
-        // Page Faults should be 9
-        (new TaskMRU(sequence1, 1, MAX_PAGE_REFERENCE, pageFaults)).run();
-        System.out.printf("Page Faults: %d\n", pageFaults[1]);
-    
-        // Replacement should be: 1, 2, 1, 3
-        // Page Faults should be 6
-        (new TaskMRU(sequence2, 2, MAX_PAGE_REFERENCE, pageFaults)).run();
-        System.out.printf("Page Faults: %d\n", pageFaults[2]);
-    
-        // Replacement should be: 3
-        // Page Faults should be 4
-        (new TaskMRU(sequence2, 3, MAX_PAGE_REFERENCE, pageFaults)).run();
-        System.out.printf("Page Faults: %d\n", pageFaults[3]);
+        int[] sequence2 = {1, 2, 1, 3, 2, 1, 2, 3, 4,6,5,2,5,7,3,2,5,7,9,0,7,5,3,1,3,5,4,7,8,7,5,3,2,6,6,6,6,6,5,2,3,5,10,4};
+        int[] pageFaults = new int[10];
+
+        for (int i = 1; i < pageFaults.length; i++) {
+            (new TaskLRU(sequence2, i, MAX_PAGE_REFERENCE, pageFaults)).run();
+            System.out.printf("Page Faults: %d\n", pageFaults[i]);  
+        }
+        reportTestAnomaly("MRU", pageFaults);
     }
 }

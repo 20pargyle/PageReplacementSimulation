@@ -26,7 +26,7 @@ public class TaskMRU implements Runnable {
                 frameStack.remove(pageIndex);
                 frameStack.addFirst(pageRef);
             }
-            // if it's not in the list, then:
+            // if it's not in the list, then: page fault occurs.
             else {
                 numPageFaults++;
                 // is the stack full?

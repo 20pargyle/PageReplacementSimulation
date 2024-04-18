@@ -115,3 +115,14 @@ TO SOLVE:
     index 0 - TaskFIFO page faults
     index 1 - TaskLRU page faults
     index 2 - TaskMRU page faults
+
+
+
+
+BUG OBSERVATIONS:
+  when testing with a smaller dataset, the page fault count seems to be THE SAME for ALL
+    frame numbers for EACH algorithm.
+
+checked:
+  anomaly reporting
+  min page fault detection works EXACTLY as expected

@@ -14,13 +14,12 @@ public class TaskFIFO implements Runnable {
         this.pageFaults = pageFaults;
         this.numPageFaults = 0;
         this.frameList = new LinkedList<>();
-    }
-
-    @Override
-    public void run() {
         for (int i = 0; i < maxMemoryFrames; i++) {
             frameList.add(-1);
         }
+    }
+    @Override
+    public void run() {
         for (int pageRef : sequence) {
             // if the page is already loaded, do nothing;
             // if not, take out the oldest and add the newest 
