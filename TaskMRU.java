@@ -1,4 +1,5 @@
 import java.util.LinkedList;
+import java.lang.reflect.Array;
 
 public class TaskMRU implements Runnable {
     private LinkedList<Integer> frameStack;
@@ -39,6 +40,6 @@ public class TaskMRU implements Runnable {
                 }
             }
         }
-        pageFaults[maxMemoryFrames] = numPageFaults;
+        Array.set(pageFaults, maxMemoryFrames, numPageFaults);
     }
 }

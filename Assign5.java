@@ -12,7 +12,7 @@ public class Assign5 {
             results[1][i] = new int[101]; // for LRU
             results[2][i] = new int[101]; // for MRU
             for (int numFrames = 1; numFrames < 101; numFrames++) {
-                int[] sequence = createSequence(MAX_PAGE_REFERENCE);
+                int[] sequence = createSequence(1000, MAX_PAGE_REFERENCE);
                 TaskFIFO taskF = new TaskFIFO(sequence, numFrames, MAX_PAGE_REFERENCE, results[0][i]);
                 TaskLRU taskL = new TaskLRU(sequence, numFrames, MAX_PAGE_REFERENCE, results[1][i]);
                 TaskMRU taskM = new TaskMRU(sequence, numFrames, MAX_PAGE_REFERENCE, results[2][i]);
@@ -59,11 +59,19 @@ public class Assign5 {
         reportAnomaly("MRU", results[2]);
     }
 
-    private static int[] createSequence(int MAX_PAGE_REFERENCE){
-        int[] sequence = new int[1000];
+    private static int[] createSequence(int sequenceLength, int limit){
+        int[] sequence = new int[sequenceLength];
         Random r = new Random();
         for (int i=0; i < sequence.length-1; i++) {
-            sequence[i] = r.nextInt(MAX_PAGE_REFERENCE + 1);
+            sequence[i] = r.nextInt(limit + 1);
+        }
+        return sequence;
+    }
+    private static int[] createSequence(int sequenceLength, int limit, int randomizerSeed){
+        int[] sequence = new int[sequenceLength];
+        Random r = new Random(randomizerSeed);
+        for (int i=0; i < sequence.length-1; i++) {
+            sequence[i] = r.nextInt(limit + 1);
         }
         return sequence;
     }
@@ -94,7 +102,7 @@ public class Assign5 {
         for (int i = 1; i < results.length-1; i++) {
             if (results[i] < results[i+1]){
                 int diff = results[i+1] - results[i];
-                // System.out.printf("detected - Previous %d : Current %d (%d)\n", list[i], list[i+1], diff);
+                System.out.printf("detected - Previous %d : Current %d (%d)\n", results[i], results[i+1], diff);
                 anomalyCount++;
                 if (diff > maxDiff){
                     maxDiff = diff;
@@ -104,34 +112,34 @@ public class Assign5 {
         System.out.printf("\tAnomaly detected %d times with a max difference of %d\n\n", anomalyCount, maxDiff);
     }
 
-    public static void testFIFO() {
-        int[] sequence2 = {1, 2, 1, 3, 2, 1, 2, 3, 4,6,5,2,5,7,3,2,5,7,9,0,7,5,3,1,3,5,4,7,8,7,5,3,2,6,6,6,6,6,5,2,3,5,10,4};
-        int[] pageFaults = new int[10];
+    public static void testFIFO(int sequenceLength, int maxMemoryFrames, int randomizerSeed) {
+        int[] sequence2 = createSequence(sequenceLength, MAX_PAGE_REFERENCE, randomizerSeed);
+        int[] pageFaults = new int[maxMemoryFrames];
 
         for (int i = 1; i < pageFaults.length; i++) {
-            (new TaskLRU(sequence2, i, MAX_PAGE_REFERENCE, pageFaults)).run();
-            System.out.printf("Page Faults: %d\n", pageFaults[i]);  
+            (new TaskFIFO(sequence2, i, MAX_PAGE_REFERENCE, pageFaults)).run();
+            // System.out.printf("Page Faults: %d\n", pageFaults[i]);  
         }
         reportTestAnomaly("FIFO", pageFaults);
     }
-    public static void testLRU() {
-        int[] sequence2 = {1, 2, 1, 3, 2, 1, 2, 3, 4,6,5,2,5,7,3,2,5,7,9,0,7,5,3,1,3,5,4,7,8,7,5,3,2,6,6,6,6,6,5,2,3,5,10,4};
-        int[] pageFaults = new int[10];
+    public static void testLRU(int sequenceLength, int maxMemoryFrames, int randomizerSeed) {
+        int[] sequence2 = createSequence(sequenceLength, MAX_PAGE_REFERENCE, randomizerSeed);
+        int[] pageFaults = new int[maxMemoryFrames];
 
         for (int i = 1; i < pageFaults.length; i++) {
             (new TaskLRU(sequence2, i, MAX_PAGE_REFERENCE, pageFaults)).run();
-            System.out.printf("Page Faults: %d\n", pageFaults[i]);  
+            // System.out.printf("Page Faults: %d\n", pageFaults[i]);  
         }
         reportTestAnomaly("LRU", pageFaults);
     }
 
-    public static void testMRU() {
-        int[] sequence2 = {1, 2, 1, 3, 2, 1, 2, 3, 4,6,5,2,5,7,3,2,5,7,9,0,7,5,3,1,3,5,4,7,8,7,5,3,2,6,6,6,6,6,5,2,3,5,10,4};
-        int[] pageFaults = new int[10];
+    public static void testMRU(int sequenceLength, int maxMemoryFrames, int randomizerSeed) {
+        int[] sequence2 = createSequence(sequenceLength, MAX_PAGE_REFERENCE, randomizerSeed);
+        int[] pageFaults = new int[maxMemoryFrames];
 
         for (int i = 1; i < pageFaults.length; i++) {
-            (new TaskLRU(sequence2, i, MAX_PAGE_REFERENCE, pageFaults)).run();
-            System.out.printf("Page Faults: %d\n", pageFaults[i]);  
+            (new TaskMRU(sequence2, i, MAX_PAGE_REFERENCE, pageFaults)).run();
+            // System.out.printf("Page Faults: %d\n", pageFaults[i]);  
         }
         reportTestAnomaly("MRU", pageFaults);
     }
