@@ -5,14 +5,14 @@ public class Assign5 {
     public static void main(String[] args) {
         int[][][] results = new int[3][1000][];
         ExecutorService threadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-        
+
         long startTime = System.currentTimeMillis();
         for (int i = 0; i < 1000; i++) {
             results[0][i] = new int[101]; // for FIFO
             results[1][i] = new int[101]; // for LRU
             results[2][i] = new int[101]; // for MRU
+            int[] sequence = createSequence(1000, MAX_PAGE_REFERENCE);
             for (int numFrames = 1; numFrames < 101; numFrames++) {
-                int[] sequence = createSequence(1000, MAX_PAGE_REFERENCE);
                 TaskFIFO taskF = new TaskFIFO(sequence, numFrames, MAX_PAGE_REFERENCE, results[0][i]);
                 TaskLRU taskL = new TaskLRU(sequence, numFrames, MAX_PAGE_REFERENCE, results[1][i]);
                 TaskMRU taskM = new TaskMRU(sequence, numFrames, MAX_PAGE_REFERENCE, results[2][i]);
@@ -84,7 +84,7 @@ public class Assign5 {
             for (int i = 1; i < list.length-1; i++) {
                 if (list[i] < list[i+1]){
                     int diff = list[i+1] - list[i];
-                    // System.out.printf("detected - Previous %d : Current %d (%d)\n", list[i], list[i+1], diff);
+                    System.out.printf("detected - Previous %d : Current %d (%d)\n", list[i], list[i+1], diff);
                     anomalyCount++;
                     if (diff > maxDiff){
                         maxDiff = diff;
