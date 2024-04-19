@@ -23,6 +23,7 @@ public class Assign5 {
         }
 
         threadPool.shutdown();
+
         try {
             threadPool.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
         }
@@ -32,7 +33,7 @@ public class Assign5 {
 
         System.out.printf("\nSimulation took %d ms\n\n", System.currentTimeMillis() - startTime);
 
-        // min page fault detection
+        // Report which algorithm had the lowest number of page faults for a given sequence and number of frames
         int minFIFO = 0;
         int minLRU = 0;
         int minMRU = 0;
@@ -67,6 +68,7 @@ public class Assign5 {
         }
         return sequence;
     }
+
     private static int[] createSequence(int sequenceLength, int limit, int randomizerSeed){
         int[] sequence = new int[sequenceLength];
         Random r = new Random(randomizerSeed);
@@ -122,6 +124,7 @@ public class Assign5 {
         }
         reportTestAnomaly("FIFO", pageFaults);
     }
+    
     public static void testLRU(int sequenceLength, int maxMemoryFrames, int randomizerSeed) {
         int[] sequence2 = createSequence(sequenceLength, MAX_PAGE_REFERENCE, randomizerSeed);
         int[] pageFaults = new int[maxMemoryFrames];

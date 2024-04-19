@@ -1,4 +1,5 @@
 import java.util.LinkedList;
+
 public class TaskLRU implements Runnable {
     private LinkedList<Integer> frameStack;
     private int[] sequence;
@@ -20,12 +21,12 @@ public class TaskLRU implements Runnable {
     public void run() {
         for (int pageRef : sequence) {
             int pageIndex = frameStack.indexOf(pageRef);
-            // if page is already in the list, we have just called for it, so let's add it to the list;
+            // if page is already in the list, we have just called for it, so let's add it to top of the list;
             if (pageIndex >= 0){
                 frameStack.remove(pageIndex);
                 frameStack.addFirst(pageRef);
             }
-            // if it's not in the list, then:
+            // if it's not in the list, then a page fault occurs.
             else {
                 numPageFaults++;
                 // if stack is not full:

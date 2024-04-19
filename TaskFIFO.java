@@ -1,4 +1,5 @@
-import java.util.*;
+import java.util.LinkedList;
+
 public class TaskFIFO implements Runnable {
     private LinkedList<Integer> frameList;
     private int[] sequence;
@@ -18,6 +19,7 @@ public class TaskFIFO implements Runnable {
             frameList.add(-1);
         }
     }
+    
     @Override
     public void run() {
         for (int pageRef : sequence) {
